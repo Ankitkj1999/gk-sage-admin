@@ -42,3 +42,5 @@ const analytics = getAnalytics(app);
 
 
 flutter build web --web-renderer html --release
+
+flutter build web --release --web-renderer html

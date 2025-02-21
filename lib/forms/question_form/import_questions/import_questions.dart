@@ -36,14 +36,29 @@ class _BulkUploadState extends ConsumerState<BulkUpload> {
   String? _selectedQuizId;
   List<ImportQuestion> _questions = [];
 
+  // _onSelectFile() async {
+  //   FilePickerResult? result = await AppService().pickCSVFile();
+  //   if (result != null && result.files.isNotEmpty) {
+  //     _selectButtonText = result.files.first.name;
+  //     Uint8List uint8list = result.files.first.bytes!;
+  //     String csvFileString = String.fromCharCodes(uint8list);
+  //
+  //     List<ImportQuestion> questions = await _getCSVQuestions(csvFileString).catchError((e) {
+  //       return List<ImportQuestion>.empty();
+  //     });
+
   _onSelectFile() async {
     FilePickerResult? result = await AppService().pickCSVFile();
     if (result != null && result.files.isNotEmpty) {
       _selectButtonText = result.files.first.name;
       Uint8List uint8list = result.files.first.bytes!;
-      String csvFileString = String.fromCharCodes(uint8list);
+
+      // Try different encoding approach
+      String csvFileString = utf8.decode(uint8list, allowMalformed: true);
+      debugPrint("File content length: ${csvFileString.length}");
 
       List<ImportQuestion> questions = await _getCSVQuestions(csvFileString).catchError((e) {
+        debugPrint("Error parsing CSV: $e");  // Add error logging
         return List<ImportQuestion>.empty();
       });
 
@@ -170,20 +185,59 @@ class _BulkUploadState extends ConsumerState<BulkUpload> {
     return valid;
   }
 
+  // Future<List<ImportQuestion>> _getCSVQuestions(String csvFileString) async {
+  //   List<ImportQuestion> csvQuestions = [];
+  //   final List<List<dynamic>> csvList = const CsvToListConverter().convert(utf8.decode(csvFileString.codeUnits));
+  //   debugPrint(csvList.length.toString());
+  //
+  //   for (int i = 1; i < csvList.length; i++) {
+  //     //Skipping the header row
+  //     List<dynamic> row = csvList[i];
+  //
+  //     final question = row[0];
+  //     final options = row[1].split('|');
+  //     final correctAnswerIndex = row[2];
+  //     final questionType = row[3];
+  //     final optionType = row[4];
+
+  // Future<List<ImportQuestion>> _getCSVQuestions(String csvFileString) async {
+  //   List<ImportQuestion> csvQuestions = [];
+  //   final List<List<dynamic>> csvList = const CsvToListConverter().convert(utf8.decode(csvFileString.codeUnits));
+  //   debugPrint("Total rows found: ${csvList.length}");
+
   Future<List<ImportQuestion>> _getCSVQuestions(String csvFileString) async {
     List<ImportQuestion> csvQuestions = [];
-    final List<List<dynamic>> csvList = const CsvToListConverter().convert(utf8.decode(csvFileString.codeUnits));
-    debugPrint(csvList.length.toString());
+    // Add this debug line to see the raw CSV string
+    debugPrint("Raw CSV string: $csvFileString");
+
+    final List<List<dynamic>> csvList = const CsvToListConverter(
+        eol: '\n',  // Explicitly set end of line character
+        shouldParseNumbers: false  // Prevent automatic number parsing
+    ).convert(utf8.decode(csvFileString.codeUnits));
+
+    debugPrint("Total rows found: ${csvList.length}");
+    // Print the first row to see what's being parsed
+    if (csvList.isNotEmpty) {
+      debugPrint("Header row: ${csvList[0]}");
+    }
 
     for (int i = 1; i < csvList.length; i++) {
-      //Skipping the header row
       List<dynamic> row = csvList[i];
+      debugPrint("Processing row $i: ${row.toString()}");
 
       final question = row[0];
       final options = row[1].split('|');
-      final correctAnswerIndex = row[2];
+      final correctAnswerIndex = int.tryParse(row[2].toString()); // Try parsing as int
       final questionType = row[3];
       final optionType = row[4];
+
+      debugPrint("Question: $question");
+      debugPrint("Options: $options");
+      debugPrint("CorrectAnswerIndex: $correctAnswerIndex");
+      debugPrint("QuestionType: $questionType");
+      debugPrint("OptionType: $optionType");
+
+
       String? imageURL = row[5];
       String? audioURL = row[6];
       String? videoURL = row[7];
