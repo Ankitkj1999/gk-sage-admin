@@ -27,6 +27,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   var formKey = GlobalKey<FormState>();
   String? password;
   final _btnCtlr = RoundedLoadingButtonController();
+  final _passwordFocus = FocusNode();
   bool _obsecureText = true;
   IconData _lockIcon = CupertinoIcons.eye_fill;
 
@@ -129,6 +130,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   void dispose() {
     emailCtrl.dispose();
     passwordCtrl.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -146,9 +148,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Image.asset(
-                Config.logo,
-                width: 200,
+              // Image.asset(
+              //   Config.logo,
+              //   width: 200,
+              // ),
+              const Text(
+                Config.appName,
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w700),
               ),
               const SizedBox(
                 height: 5,
@@ -182,6 +188,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                             suffixIcon: IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => emailCtrl.clear()),
                           ),
+                          onFieldSubmitted: (_){
+                            FocusScope.of(context).requestFocus(_passwordFocus);
+                          },
                           validator: (String? value) {
                             if (value!.isEmpty) {
                               return "Password can't be empty";
@@ -202,6 +211,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                         ),
                         TextFormField(
                           controller: passwordCtrl,
+                          focusNode: _passwordFocus,
                           obscureText: _obsecureText,
                           decoration: InputDecoration(
                             hintText: 'Enter password',
@@ -214,6 +224,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                               ],
                             ),
                           ),
+                          onFieldSubmitted: (_) => _handleSignIn(),
                           validator: (String? value) {
                             if (value!.isEmpty) {
                               return "Password can't be empty";
