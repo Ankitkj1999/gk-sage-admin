@@ -31,12 +31,35 @@
   <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>Admin Panel</title>
+  <title>Admin Panel</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = null;
+  </script>
+  <!-- Add flutter.js here -->
+  <script src="flutter.js" defer></script>
   <script type="application/javascript" src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
-    defer></script>
+          defer></script>
 </head>
 
 <body>
+<script>
+  window.addEventListener('load', function (ev) {
+    // Download main.dart.js
+    _flutter.loader.loadEntrypoint({
+      entrypointUrl: "main.dart.js?v=" + serviceWorkerVersion,
+      serviceWorker: {
+        serviceWorkerVersion: serviceWorkerVersion,
+      },
+      onEntrypointLoaded: function (engineInitializer) {
+        engineInitializer.initializeEngine().then(function (appRunner) {
+          appRunner.runApp();
+        });
+      }
+    });
+  });
+</script>
   <script src="flutter_bootstrap.js" async></script>
 
   <!-- Custom loader -->
