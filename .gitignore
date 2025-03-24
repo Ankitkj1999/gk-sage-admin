@@ -54,3 +54,5 @@ ios/Runner/GoogleService-Info.plist
 firebase.json
 lib/firebase_options.dart
 gk-sage-admin-firebase-adminsdk-fbsvc-5fe087be04.json
+gk-sage-admin-firebase-adminsdk-*.json
+lib/configs/fcm_config.dart
